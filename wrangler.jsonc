@@ -1,10 +1,15 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "jtv-reviews",
+  "name": "jtv-preview",
+  // Cloudflare account that owns thejoietv.com (needed so the custom domain can attach).
+  "account_id": "8029ae1261c5cf9e7676a873fb44e188",
   "main": ".open-next/worker.js",
   "upload_source_maps": true,
   "compatibility_date": "2026-11-21",
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Served only on the custom domain. Cloudflare creates the DNS record and certificate.
+  "workers_dev": false,
+  "routes": [{ "pattern": "preview.thejoietv.com", "custom_domain": true }]
 }

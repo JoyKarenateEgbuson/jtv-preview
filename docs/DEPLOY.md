@@ -59,8 +59,11 @@ To try it locally in the Workers runtime first: copy `.env.local` to `.dev.vars`
 
 ## Current status
 
-Live (own Cloudflare account) at **https://jtv-reviews.jtv-reviews.workers.dev**. The custom address `preview.thejoietv.com` is waiting on access to the Cloudflare account that owns `thejoietv.com` (see above).
+**Live at https://preview.thejoietv.com**, as the Worker `jtv-preview` in the Cloudflare account that owns `thejoietv.com` (its account id is in `wrangler.jsonc`; you are a member of that account).
+
+A backup copy also runs in your own account at https://jtv-reviews.jtv-reviews.workers.dev (Worker `jtv-reviews`, with its own secrets). Delete it from the Cloudflare dashboard when you no longer want it.
 
 - **Deploy/update:** `npm run deploy`. It hides `.env.local` during the build on purpose: the Cloudflare build tool otherwise bundles local `.env` files into the live code, which would ship your dev passwords and Google keys. Do not replace it with a plain `opennextjs-cloudflare deploy`.
 - **Production secrets** live in Cloudflare, not in the code. Change one with `npx wrangler secret put NAME`, or all at once with `npx wrangler secret bulk <file>`.
-- `.env.vercel` (git-ignored) holds the production values created for the first deploy. Keep the admin password in a password manager, then delete the file.
+- `.env.preview` (git-ignored) holds the production values for the live site. Keep the admin password in a password manager, then delete the file.
+- A Git-connected `jtv-preview` project on the Cloudflare account failed its first build and is not needed, because `npm run deploy` is the deploy path. If it stays connected, make sure it deploys the same Worker name, or delete it.
