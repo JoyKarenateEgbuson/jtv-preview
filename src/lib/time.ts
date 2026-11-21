@@ -19,6 +19,10 @@ export function formatClock(seconds: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
+/** One fixed date format (e.g. "21 Nov 2026") so server and browser always render the same text. */
+export const formatDate = (ms: number) =>
+  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
 /** True when a share link's expiry (unix seconds, 0 = never) has passed. */
 export const isExpired = (expiresAt: number) => expiresAt > 0 && expiresAt < Date.now() / 1000;
 

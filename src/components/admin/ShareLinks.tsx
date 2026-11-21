@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { isExpired } from "@/lib/time";
+import { formatDate, isExpired } from "@/lib/time";
 import type { ShareLink } from "@/lib/types";
 import CopyButton from "../CopyButton";
 
@@ -63,7 +63,7 @@ export default function ShareLinks({ videoId, links }: { videoId: string; links:
                   {expired
                     ? "Expired"
                     : l.expiresAt
-                      ? `Expires ${new Date(l.expiresAt * 1000).toLocaleDateString()}`
+                      ? `Expires ${formatDate(l.expiresAt * 1000)}`
                       : "Never expires"}
                 </p>
               </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { formatTc, snapToFrame } from "@/lib/time";
+import { formatDate, formatTc, snapToFrame } from "@/lib/time";
 import type { Comment, Role } from "@/lib/types";
 import VideoPlayer, { type PlayerHandle } from "./VideoPlayer";
 
@@ -235,7 +235,7 @@ export default function ReviewRoom(p: Props) {
                 <span className="font-semibold">{c.author}</span>
                 {c.role === "admin" && <span className="rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
                 {c.internal && <span className="rounded bg-magenta px-1.5 text-[10px] font-bold">INTERNAL</span>}
-                <span className="ml-auto text-stone">{new Date(c.createdAt).toLocaleDateString()}</span>
+                <span className="ml-auto text-stone">{formatDate(c.createdAt)}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm">{c.text}</p>
 
