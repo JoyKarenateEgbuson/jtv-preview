@@ -56,3 +56,11 @@ npm run deploy
 ```
 
 To try it locally in the Workers runtime first: copy `.env.local` to `.dev.vars`, then `npm run preview`.
+
+## Current status
+
+Live (own Cloudflare account) at **https://jtv-reviews.jtv-reviews.workers.dev**. The custom address `preview.thejoietv.com` is waiting on access to the Cloudflare account that owns `thejoietv.com` (see above).
+
+- **Deploy/update:** `npm run deploy`. It hides `.env.local` during the build on purpose: the Cloudflare build tool otherwise bundles local `.env` files into the live code, which would ship your dev passwords and Google keys. Do not replace it with a plain `opennextjs-cloudflare deploy`.
+- **Production secrets** live in Cloudflare, not in the code. Change one with `npx wrangler secret put NAME`, or all at once with `npx wrangler secret bulk <file>`.
+- `.env.vercel` (git-ignored) holds the production values created for the first deploy. Keep the admin password in a password manager, then delete the file.
