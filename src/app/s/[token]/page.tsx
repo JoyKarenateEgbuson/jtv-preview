@@ -15,7 +15,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   if (isExpired(link.expiresAt)) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-        <Logo height={36} />
+        <Logo height={72} />
         <h1 className="text-xl font-bold">This link has expired</h1>
         <p className="text-cream/70">Ask The Joie TV for a fresh one.</p>
       </main>
@@ -28,7 +28,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   if (!name) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
-        <Logo height={36} />
+        <Logo height={72} />
         <NamePrompt token={token} />
       </main>
     );
@@ -40,7 +40,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-7xl items-center px-4 py-3"><Logo height={26} /></div>
+        <div className="mx-auto flex max-w-7xl items-center px-4 py-3"><Logo height={38} /></div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
         <ReviewRoom

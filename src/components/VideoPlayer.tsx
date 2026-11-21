@@ -51,6 +51,18 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   const [fullscreen, setFullscreen] = useState(false);
   const [blocked, setBlocked] = useState(false);
 
+  /* The browser can finish loading the video's metadata before React attaches the
+     event handlers below (fast connections, cached video), so we'd never hear about
+     it. Read the current state once on startup to catch up. */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.readyState >= 1 && Number.isFinite(v.duration)) setDuration(v.duration);
+    if (v.buffered.length) setBuffered(v.buffered.end(v.buffered.length - 1));
+    setVolume(v.volume);
+    setPlaying(!v.paused);
+  }, []);
+
   const seek = useCallback(
     (t: number) => {
       const v = videoRef.current;

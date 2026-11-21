@@ -20,7 +20,7 @@ export default async function ClientPortal({ params }: { params: Promise<{ token
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-5xl items-center px-4 py-3"><Logo height={28} /></div>
+        <div className="mx-auto flex max-w-5xl items-center px-4 py-3"><Logo height={40} /></div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-bold">Hi {person.name} 👋</h1>

@@ -7,7 +7,7 @@ export default async function LoginPage() {
   if (await isAdmin()) redirect("/admin");
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
-      <Logo height={40} />
+      <Logo height={84} />
       <LoginForm />
     </main>
   );

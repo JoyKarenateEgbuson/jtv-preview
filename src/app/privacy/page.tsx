@@ -5,7 +5,7 @@ export const metadata = { title: "Privacy · The Joie TV Preview" };
 export default function Privacy() {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 space-y-4 px-4 py-10">
-      <Logo height={34} />
+      <Logo height={64} />
       <h1 className="text-2xl font-bold">Privacy policy</h1>
       <p className="text-cream/80">
         preview.thejoietv.com is a private portal where The Joie TV shares videos with clients and collaborators for feedback.

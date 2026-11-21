@@ -4,7 +4,7 @@ import Logo from "@/components/Logo";
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-      <Logo height={48} />
+      <Logo height={110} />
       <h1 className="text-2xl font-bold">Preview</h1>
       <p className="max-w-sm text-cream/70">
         This is a private preview portal. If you were sent a link, open it directly.

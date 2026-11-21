@@ -1,5 +1,5 @@
-// Swap public/logo.svg for the real logo and this updates everywhere (including the watermark).
-export const LOGO_SRC = "/logo.svg";
+// Swap public/logo.png (white, transparent) for a new logo and this updates everywhere (including the watermark).
+export const LOGO_SRC = "/logo.png";
 
 export default function Logo({ height = 28 }: { height?: number }) {
   // eslint-disable-next-line @next/next/no-img-element

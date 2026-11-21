@@ -21,7 +21,7 @@ export default async function ClientWatch({ params }: { params: Promise<{ token:
     <>
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-          <Logo height={26} />
+          <Logo height={38} />
           <Link href={`/c/${token}`} className="ml-auto text-sm text-cream/60 hover:text-cream">← All videos</Link>
         </div>
       </header>

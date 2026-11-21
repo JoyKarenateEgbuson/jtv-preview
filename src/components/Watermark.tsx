@@ -30,7 +30,7 @@ export default function Watermark({ name }: { name: string }) {
         style={{ animationDelay: `-${hash}s`, opacity: 0.85 }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={LOGO_SRC} alt="" draggable={false} style={{ height: "clamp(14px, 3cqw, 34px)" }} />
+        <img src={LOGO_SRC} alt="" draggable={false} style={{ height: "clamp(20px, 5cqw, 56px)" }} />
         <span
           className="font-semibold text-white"
           style={{ fontSize: "clamp(10px, 2cqw, 22px)", textShadow: "0 1px 3px rgba(0,0,0,.7)" }}
