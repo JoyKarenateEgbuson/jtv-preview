@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
+/* The Joie TV palette */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #14151a;
+  --panel: #1d1f27;
+  --line: #2d303b;
+  --cream: #f5eedc;
+  --brand: #ff7a00;
+  --magenta: #c6249b;
+  --sun: #ffd34a;
+  --stone: #8a857d;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-cream: var(--cream);
+  --color-brand: var(--brand);
+  --color-magenta: var(--magenta);
+  --color-sun: var(--sun);
+  --color-stone: var(--stone);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--ink);
+}
+
+/* Form controls shared across the app */
+.field {
+  width: 100%;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--cream);
+  font-size: 0.9rem;
+}
+.field:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: -1px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--brand);
+  color: var(--ink);
+  transition: filter 0.15s;
+  cursor: pointer;
+}
+.btn:hover {
+  filter: brightness(1.1);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid var(--line);
+}
+.btn-ghost:hover {
+  background: var(--panel);
+  filter: none;
+}
+.btn-danger {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #5a2b2b;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+}
+
+/* Drifting watermark: the badge wanders around the frame so it can't simply be cropped out. */
+@keyframes wm-drift {
+  0% { left: 4%; top: 6%; }
+  25% { left: 58%; top: 12%; }
+  50% { left: 52%; top: 78%; }
+  75% { left: 6%; top: 66%; }
+  100% { left: 4%; top: 6%; }
+}
+.wm-badge {
+  position: absolute;
+  animation: wm-drift 70s linear infinite;
 }

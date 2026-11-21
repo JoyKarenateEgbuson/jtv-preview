@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Joie TV Reviews
 
-## Getting Started
+Private video review portal for `reviews.thejoietv.com`: timestamped comments, per-viewer watermark, no-download streaming, client pages and share links.
 
-First, run the development server:
+## Run locally
 
-```bash
+```powershell
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000/admin>. The dev admin password is in `.env.local` (`ADMIN_PASSWORD`). With no Google keys set, videos and data are stored in `.data/` on this computer.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Storage:** Google Drive (your own space). Videos stay private; the site streams them with HTTP Range requests, so the original file link is never exposed.
+- **Data:** Firestore (free tier) for clients, links and comments.
+- **Access:** one admin password; clients get a private page `/c/<token>`; anyone else gets a share link `/s/<token>`. Every video request carries a signed, expiring token.
+- **Rules:** guests and share links are always watermarked with no download. Clients follow each video's settings.
 
-## Learn More
+Go live: [docs/SETUP.md](docs/SETUP.md) (Google Drive + Firestore), then [docs/DEPLOY.md](docs/DEPLOY.md) (Cloudflare).
 
-To learn more about Next.js, take a look at the following resources:
+## Code map
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | What |
+|---|---|
+| `src/lib/storage.ts` | Drive/local upload and the byte-range streaming proxy |
+| `src/lib/db/` | Firestore (REST) and local JSON stores behind one interface |
+| `src/lib/access.ts` | Viewer tokens and what each role may do |
+| `src/components/VideoPlayer.tsx` | Frame-accurate player, watermark enforcement |
+| `src/components/ReviewRoom.tsx` | Player + comments |
+| `src/lib/session.ts` | Admin session; `requireAdminPage()` guards every admin page |
+| `wrangler.jsonc`, `open-next.config.ts` | Cloudflare Workers deployment |
