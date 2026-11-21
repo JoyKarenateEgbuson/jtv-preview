@@ -12,7 +12,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-6xl items-center gap-5 px-4 py-3">
+        <div className="mx-auto flex max-w-[2200px] items-center gap-5 px-4 py-3">
           <Link href="/admin"><Logo height={38} /></Link>
           <nav className="flex gap-4 text-sm">
             <Link href="/admin" className="hover:text-brand">Videos</Link>
@@ -28,7 +28,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </div>
         )}
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-[2200px] flex-1 px-4 py-6">{children}</main>
     </>
   );
 }

@@ -38,7 +38,7 @@ export async function removeLocalFile(ref: string) {
   await fs.rm(path.join(localDir, ref), { force: true });
 }
 
-export async function openLocalStream(video: Video, rangeHeader: string | null): Promise<StreamResult> {
+export async function openLocalStream(video: Pick<Video, "fileRef" | "mimeType">, rangeHeader: string | null): Promise<StreamResult> {
   const file = path.join(localDir, video.fileRef);
   let size: number;
   try {

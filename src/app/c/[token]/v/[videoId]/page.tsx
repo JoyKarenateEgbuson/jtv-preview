@@ -14,18 +14,18 @@ export default async function ClientWatch({ params }: { params: Promise<{ token:
 
   const role = person.kind; // "client" | "guest"
   const perms = permsFor(role, video);
-  const viewerToken = await mintViewerToken(video.id, { role, name: person.name });
+  const viewerToken = await mintViewerToken(video, { role, name: person.name });
   const versions = (await listStack(video.stackId)).filter((v) => v.personIds.includes(person.id));
 
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-[2200px] items-center gap-4 px-4 py-3">
           <Logo height={38} />
           <Link href={`/c/${token}`} className="ml-auto text-sm text-cream/60 hover:text-cream">← All videos</Link>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-[2200px] flex-1 px-4 py-6">
         <ReviewRoom
           token={viewerToken}
           videoId={video.id}

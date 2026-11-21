@@ -3,7 +3,7 @@
   "name": "jtv-preview",
   // Cloudflare account that owns thejoietv.com (needed so the custom domain can attach).
   "account_id": "8029ae1261c5cf9e7676a873fb44e188",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "upload_source_maps": true,
   "compatibility_date": "2026-11-21",
   "compatibility_flags": ["nodejs_compat"],

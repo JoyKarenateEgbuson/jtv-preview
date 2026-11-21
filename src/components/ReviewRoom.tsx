@@ -20,6 +20,7 @@ type Props = {
 };
 
 type Filter = "all" | "open" | "resolved";
+type MenuItem = { label: string; danger?: boolean; run: () => void };
 
 export default function ReviewRoom(p: Props) {
   const playerRef = useRef<PlayerHandle>(null);
@@ -33,16 +34,21 @@ export default function ReviewRoom(p: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const src = `/api/stream/${p.videoId}?t=${encodeURIComponent(p.token)}`;
+  const q = `t=${encodeURIComponent(p.token)}`;
   const isAdmin = p.role === "admin";
+  const isOwn = (c: Comment) => c.author === p.viewerName && c.role === p.role;
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/comments?t=${encodeURIComponent(p.token)}`, { cache: "no-store" });
+    const res = await fetch(`/api/comments?${q}`, { cache: "no-store" });
     if (res.ok) setComments((await res.json()) as Comment[]);
-  }, [p.token]);
+  }, [q]);
 
   useEffect(() => {
     // Initial load, then poll so new feedback shows up without a refresh.
@@ -51,6 +57,16 @@ export default function ReviewRoom(p: Props) {
     const id = window.setInterval(load, 8000);
     return () => window.clearInterval(id);
   }, [load]);
+
+  /* Close an open comment menu when clicking anywhere else. */
+  useEffect(() => {
+    if (!menuFor) return;
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as HTMLElement).closest("[data-comment-menu]")) setMenuFor(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [menuFor]);
 
   const onTime = useCallback((t: number) => {
     timeRef.current = t;
@@ -69,6 +85,10 @@ export default function ReviewRoom(p: Props) {
     [top],
   );
 
+  async function failMessage(res: Response, fallback: string) {
+    setError(((await res.json().catch(() => ({}))) as { error?: string }).error ?? fallback);
+  }
+
   async function post(body: Record<string, unknown>) {
     setBusy(true);
     setError("");
@@ -79,7 +99,7 @@ export default function ReviewRoom(p: Props) {
     });
     setBusy(false);
     if (!res.ok) {
-      setError(((await res.json().catch(() => ({}))) as { error?: string }).error ?? "Could not post");
+      await failMessage(res, "Could not post");
       return false;
     }
     await load();
@@ -106,18 +126,113 @@ export default function ReviewRoom(p: Props) {
   }
 
   async function toggleResolved(c: Comment) {
-    await fetch(`/api/comments/${c.id}?t=${encodeURIComponent(p.token)}`, {
+    setError("");
+    const res = await fetch(`/api/comments/${c.id}?${q}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ resolved: !c.resolved }),
     });
+    if (!res.ok) await failMessage(res, "Could not update");
+    await load();
+  }
+
+  async function saveEdit(c: Comment) {
+    setError("");
+    const res = await fetch(`/api/comments/${c.id}?${q}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: editText }),
+    });
+    if (!res.ok) {
+      await failMessage(res, "Could not save");
+      return;
+    }
+    setEditing(null);
     await load();
   }
 
   async function remove(c: Comment) {
     if (!confirm("Delete this comment?")) return;
-    await fetch(`/api/comments/${c.id}?t=${encodeURIComponent(p.token)}`, { method: "DELETE" });
+    setError("");
+    const res = await fetch(`/api/comments/${c.id}?${q}`, { method: "DELETE" });
+    if (!res.ok) await failMessage(res, "Could not delete");
     await load();
+  }
+
+  /** What the "⋮" menu offers on a comment, depending on who is looking. Empty = no menu. */
+  function menuItems(c: Comment): MenuItem[] {
+    const items: MenuItem[] = [];
+    if (isOwn(c)) {
+      items.push({
+        label: "Edit",
+        run: () => {
+          setEditing(c.id);
+          setEditText(c.text);
+        },
+      });
+    }
+    if (isAdmin && !c.parentId) {
+      items.push({ label: c.resolved ? "Reopen" : "Mark resolved", run: () => void toggleResolved(c) });
+    }
+    if (isAdmin || isOwn(c)) items.push({ label: "Delete", danger: true, run: () => void remove(c) });
+    return items;
+  }
+
+  function renderMenu(c: Comment) {
+    const items = menuItems(c);
+    if (items.length === 0) return null;
+    return (
+      <div className="relative" data-comment-menu>
+        <button
+          type="button"
+          aria-label="Comment options"
+          aria-haspopup="menu"
+          aria-expanded={menuFor === c.id}
+          onClick={() => setMenuFor(menuFor === c.id ? null : c.id)}
+          className="grid h-6 w-6 place-items-center rounded text-cream/70 hover:bg-white/10 hover:text-cream"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
+          </svg>
+        </button>
+        {menuFor === c.id && (
+          <div role="menu" className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-line bg-panel py-1 shadow-xl">
+            {items.map((it) => (
+              <button
+                key={it.label}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuFor(null);
+                  it.run();
+                }}
+                className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-white/10 ${it.danger ? "text-red-400" : ""}`}
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderEditBox(c: Comment) {
+    return (
+      <div className="mt-2 space-y-2">
+        <textarea
+          className="field min-h-16 resize-y"
+          value={editText}
+          maxLength={2000}
+          autoFocus
+          onChange={(e) => setEditText(e.target.value)}
+        />
+        <div className="flex gap-2">
+          <button type="button" className="btn" disabled={!editText.trim()} onClick={() => void saveEdit(c)}>Save</button>
+          <button type="button" className="btn btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
+        </div>
+      </div>
+    );
   }
 
   function exportCsv() {
@@ -149,7 +264,7 @@ export default function ReviewRoom(p: Props) {
   const openCount = top.filter((c) => !c.resolved).length;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
       <div className="min-w-0">
         <VideoPlayer
           ref={playerRef}
@@ -159,6 +274,8 @@ export default function ReviewRoom(p: Props) {
           markers={markers}
           rangePreview={rangeStart != null || rangeEnd != null ? { start: rangeStart ?? time, end: rangeEnd } : null}
           onTime={onTime}
+          canSaveStill={p.canDownload}
+          stillName={p.title}
         />
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-bold">{p.title}</h1>
@@ -178,7 +295,7 @@ export default function ReviewRoom(p: Props) {
             </div>
           )}
           {p.canDownload && (
-            <a className="btn btn-ghost ml-auto" href={`/api/download/${p.videoId}?t=${encodeURIComponent(p.token)}`}>
+            <a className="btn btn-ghost ml-auto" href={`/api/download/${p.videoId}?${q}`}>
               Download
             </a>
           )}
@@ -188,7 +305,7 @@ export default function ReviewRoom(p: Props) {
         </p>
       </div>
 
-      <aside className="card flex max-h-[80vh] min-h-[420px] flex-col overflow-hidden">
+      <aside className="card flex max-h-[75vh] min-h-[420px] flex-col overflow-hidden lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem)] lg:max-h-none">
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <h2 className="font-semibold">
             Comments <span className="text-stone">· {openCount} open</span>
@@ -218,7 +335,7 @@ export default function ReviewRoom(p: Props) {
             </p>
           )}
           {shown.map((c) => (
-            <div key={c.id} className={`rounded-lg border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-ink/40"} ${c.resolved ? "opacity-60" : ""}`}>
+            <div key={c.id} className={`rounded-lg border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-white/[0.03]"} ${c.resolved ? "opacity-70" : ""}`}>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
@@ -226,40 +343,53 @@ export default function ReviewRoom(p: Props) {
                     playerRef.current?.pause();
                     playerRef.current?.seek(c.time);
                   }}
-                  className="rounded bg-sun px-1.5 py-0.5 font-mono font-bold text-ink hover:brightness-110"
+                  className="shrink-0 whitespace-nowrap rounded bg-sun px-1.5 py-0.5 font-mono font-bold text-ink hover:brightness-110"
                   title="Jump to this moment"
                 >
                   {formatTc(c.time, p.fps)}
                   {c.timeEnd != null && ` → ${formatTc(c.timeEnd, p.fps)}`}
                 </button>
-                <span className="font-semibold">{c.author}</span>
-                {c.role === "admin" && <span className="rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
-                {c.internal && <span className="rounded bg-magenta px-1.5 text-[10px] font-bold">INTERNAL</span>}
-                <span className="ml-auto text-stone">{formatDate(c.createdAt)}</span>
+                <span className="min-w-0 truncate font-semibold">{c.author}</span>
+                {c.role === "admin" && <span className="shrink-0 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
+                {c.internal && <span className="shrink-0 rounded bg-magenta px-1.5 text-[10px] font-bold">INTERNAL</span>}
+                <span className="ml-auto shrink-0 whitespace-nowrap text-stone">{formatDate(c.createdAt)}</span>
+                {renderMenu(c)}
               </div>
-              <p className="mt-2 whitespace-pre-wrap text-sm">{c.text}</p>
+
+              {editing === c.id ? (
+                renderEditBox(c)
+              ) : (
+                <p className="mt-2 whitespace-pre-wrap text-sm">
+                  {c.text}
+                  {c.editedAt ? <span className="ml-1 text-xs text-stone">(edited)</span> : null}
+                </p>
+              )}
+
+              {c.resolved && (
+                <p className="mt-2 text-xs font-semibold text-sun">✓ Resolved</p>
+              )}
 
               {repliesOf(c.id).map((r) => (
                 <div key={r.id} className="mt-2 border-l-2 border-line pl-3">
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="font-semibold">{r.author}</span>
-                    {r.role === "admin" && <span className="rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
-                    {(isAdmin || (r.author === p.viewerName && r.role === p.role)) && (
-                      <button type="button" onClick={() => remove(r)} className="ml-auto text-stone hover:text-red-400">delete</button>
-                    )}
+                    <span className="min-w-0 truncate font-semibold">{r.author}</span>
+                    {r.role === "admin" && <span className="shrink-0 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
+                    <span className="ml-auto shrink-0 whitespace-nowrap text-stone">{formatDate(r.createdAt)}</span>
+                    {renderMenu(r)}
                   </div>
-                  <p className="whitespace-pre-wrap text-sm text-cream/90">{r.text}</p>
+                  {editing === r.id ? (
+                    renderEditBox(r)
+                  ) : (
+                    <p className="whitespace-pre-wrap text-sm text-cream/90">
+                      {r.text}
+                      {r.editedAt ? <span className="ml-1 text-xs text-stone">(edited)</span> : null}
+                    </p>
+                  )}
                 </div>
               ))}
 
               <div className="mt-2 flex gap-3 text-xs text-cream/60">
                 <button type="button" onClick={() => setReplyTo(replyTo === c.id ? null : c.id)} className="hover:text-cream">Reply</button>
-                <button type="button" onClick={() => toggleResolved(c)} className="hover:text-cream">
-                  {c.resolved ? "Reopen" : "Mark resolved"}
-                </button>
-                {(isAdmin || (c.author === p.viewerName && c.role === p.role)) && (
-                  <button type="button" onClick={() => remove(c)} className="ml-auto hover:text-red-400">Delete</button>
-                )}
               </div>
 
               {replyTo === c.id && (

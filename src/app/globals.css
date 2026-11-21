@@ -2,9 +2,9 @@
 
 /* The Joie TV palette */
 :root {
-  --ink: #14151a;
-  --panel: #1d1f27;
-  --line: #2d303b;
+  --ink: #000000;
+  --panel: #0e0e11;
+  --line: #25262c;
   --cream: #f5eedc;
   --brand: #ff7a00;
   --magenta: #c6249b;
@@ -95,15 +95,8 @@ body {
   border-radius: 0.9rem;
 }
 
-/* Drifting watermark: the badge wanders around the frame so it can't simply be cropped out. */
-@keyframes wm-drift {
-  0% { left: 4%; top: 6%; }
-  25% { left: 58%; top: 12%; }
-  50% { left: 52%; top: 78%; }
-  75% { left: 6%; top: 66%; }
-  100% { left: 4%; top: 6%; }
-}
-.wm-badge {
-  position: absolute;
-  animation: wm-drift 70s linear infinite;
+/* Speed slider in the player */
+input[type="range"].speed {
+  width: 100%;
+  accent-color: var(--brand);
 }

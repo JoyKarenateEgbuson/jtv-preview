@@ -1,5 +1,6 @@
 import { storageMode } from "./config";
 import { store } from "./db/store";
+import { fetchDriveMedia, mediaHeaders } from "./drivestream";
 import { driveToken } from "./google";
 import type { Video } from "./types";
 
@@ -78,22 +79,13 @@ export async function removeFile(video: Video) {
 export type StreamResult = { status: number; headers: Record<string, string>; body: BodyInit | null };
 
 /** Opens the video bytes (honouring HTTP Range) from Drive or local disk. */
-export async function openStream(video: Video, rangeHeader: string | null): Promise<StreamResult> {
+export async function openStream(
+  video: Pick<Video, "storage" | "fileRef" | "mimeType">,
+  rangeHeader: string | null,
+): Promise<StreamResult> {
   if (video.storage === "drive") {
-    const upstream = await fetch(`${DRIVE}/files/${video.fileRef}?alt=media`, {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${await driveToken()}`,
-        "Accept-Encoding": "identity",
-        ...(rangeHeader ? { Range: rangeHeader } : {}),
-      },
-    });
-    const headers: Record<string, string> = { "Content-Type": video.mimeType };
-    for (const h of ["content-length", "content-range"]) {
-      const v = upstream.headers.get(h);
-      if (v) headers[h] = v;
-    }
-    return { status: upstream.status, headers, body: upstream.body };
+    const upstream = await fetchDriveMedia(video.fileRef, rangeHeader);
+    return { status: upstream.status, headers: mediaHeaders(upstream, video.mimeType), body: upstream.body };
   }
 
   if (!isValidLocalRef(video.fileRef)) return { status: 404, headers: {}, body: null };

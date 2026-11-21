@@ -56,4 +56,6 @@ export type Comment = {
   resolved: boolean;
   parentId: string | null;
   createdAt: number;
+  /** Set when the author edits the text. */
+  editedAt?: number | null;
 };

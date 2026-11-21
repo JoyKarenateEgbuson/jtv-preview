@@ -1,15 +1,18 @@
 import type { NextRequest } from "next/server";
-import { authorize } from "@/lib/access";
 import { openStream } from "@/lib/storage";
+import { authorizeStream } from "@/lib/streamauth";
 
-// The streaming proxy: checks the viewer's signed token, then relays the requested
-// byte range from storage. The original file's location is never revealed.
+// Used for local-disk dev videos. On Cloudflare, worker.ts answers /api/stream/* for Drive
+// videos before Next.js even runs (far cheaper), and this route is the fallback.
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const auth = await authorize(req.nextUrl.searchParams.get("t"));
-  if (!auth || auth.video.id !== id) return new Response("Forbidden", { status: 403 });
+  const auth = await authorizeStream(req.nextUrl.searchParams.get("t"));
+  if (!auth || auth.videoId !== id) return new Response("Forbidden", { status: 403 });
 
-  const result = await openStream(auth.video, req.headers.get("range"));
+  const result = await openStream(
+    { storage: auth.storage, fileRef: auth.fileRef, mimeType: auth.mime },
+    req.headers.get("range"),
+  );
   return new Response(result.body, {
     status: result.status,
     headers: {

@@ -17,7 +17,7 @@ export default async function AdminVideoPage({ params }: { params: Promise<{ id:
 
   const [people, links, stack] = await Promise.all([listPeople(), listLinks(id), listStack(video.stackId)]);
   const name = adminName();
-  const token = await mintViewerToken(video.id, { role: "admin", name });
+  const token = await mintViewerToken(video, { role: "admin", name });
   const perms = permsFor("admin", video);
 
   return (
@@ -36,7 +36,7 @@ export default async function AdminVideoPage({ params }: { params: Promise<{ id:
         versions={stack.map((v) => ({ id: v.id, label: `v${v.version}`, href: `/admin/videos/${v.id}` }))}
       />
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-2">
         <VideoSettings key={video.id + video.createdAt} video={video} people={people} />
         <div className="space-y-5">
           <ShareLinks videoId={video.id} links={links} />

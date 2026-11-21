@@ -18,7 +18,7 @@ export default async function AdminHome() {
   const names = new Map(people.map((p) => [p.id, p.name]));
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <VideoUploader />
       {cards.length === 0 ? (
         <p className="py-10 text-center text-stone">No videos yet. Upload your first cut above.</p>

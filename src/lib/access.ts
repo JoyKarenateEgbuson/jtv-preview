@@ -16,15 +16,22 @@ export function permsFor(role: Role, video: Video) {
 
 const TOKEN_SECONDS = 12 * 60 * 60;
 
-export type ViewerToken = { v: string; r: Role; n: string; e: number };
+/** v = video id, r = role, n = name, e = expiry; f/m/s = where the file is (so streaming needs no database). */
+export type ViewerToken = { v: string; r: Role; n: string; e: number; f?: string; m?: string; s?: "drive" | "local" };
 
 /** Signed pass for one video, embedded in the stream/comment URLs of the watch page. */
-export function mintViewerToken(videoId: string, viewer: Viewer): Promise<string> {
+export function mintViewerToken(
+  video: Pick<Video, "id" | "fileRef" | "mimeType" | "storage">,
+  viewer: Viewer,
+): Promise<string> {
   const payload: ViewerToken = {
-    v: videoId,
+    v: video.id,
     r: viewer.role,
     n: viewer.name,
     e: Math.floor(Date.now() / 1000) + TOKEN_SECONDS,
+    f: video.fileRef,
+    m: video.mimeType,
+    s: video.storage,
   };
   return signToken(payload);
 }

@@ -35,14 +35,14 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   }
 
   const perms = permsFor("guest", video);
-  const viewerToken = await mintViewerToken(video.id, { role: "guest", name });
+  const viewerToken = await mintViewerToken(video, { role: "guest", name });
 
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-7xl items-center px-4 py-3"><Logo height={38} /></div>
+        <div className="mx-auto flex max-w-[2200px] items-center px-4 py-3"><Logo height={38} /></div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-[2200px] flex-1 px-4 py-6">
         <ReviewRoom
           token={viewerToken}
           videoId={video.id}
