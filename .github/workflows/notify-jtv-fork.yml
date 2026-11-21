@@ -1,0 +1,23 @@
+name: Notify jtv-preview fork
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notify:
+    if: github.repository == 'JoyKarenateEgbuson/jtv-preview'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger fork sync
+        env:
+          GH_TOKEN: ${{ secrets.FORK_SYNC_TOKEN }}
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Add the FORK_SYNC_TOKEN repository secret to enable fork sync."
+            exit 1
+          fi
+          gh api --method POST repos/Isrealthekid/jtv-preview/actions/workflows/sync-upstream.yml/dispatches -f ref=main
