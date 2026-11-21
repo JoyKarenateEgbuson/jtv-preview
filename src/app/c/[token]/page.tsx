@@ -24,7 +24,7 @@ export default async function ClientPortal({ params }: { params: Promise<{ token
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
         <h1 className="text-2xl font-bold">Hi {person.name} 👋</h1>
-        <p className="mt-1 text-cream/70">Here&apos;s what&apos;s ready for your review.</p>
+        <p className="mt-1 text-cream/70">Here&apos;s what&apos;s ready for you to watch.</p>
 
         {cards.length === 0 ? (
           <p className="py-16 text-center text-stone">Nothing has been shared with you yet.</p>

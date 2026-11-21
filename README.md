@@ -1,6 +1,6 @@
-# The Joie TV Reviews
+# The Joie TV Preview
 
-Private video review portal for `reviews.thejoietv.com`: timestamped comments, per-viewer watermark, no-download streaming, client pages and share links.
+Private video preview portal for `preview.thejoietv.com`: timestamped comments, per-viewer watermark, no-download streaming, client pages and share links.
 
 ## Run locally
 

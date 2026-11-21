@@ -43,7 +43,7 @@ export default async function AdminVideoPage({ params }: { params: Promise<{ id:
           <div className="card space-y-3 p-5">
             <h2 className="font-semibold">Upload a new version</h2>
             <p className="text-xs text-stone">
-              Adds v{stack.length + 1} to this stack. It inherits the audience and settings, and reviewers can switch between versions.
+              Adds v{stack.length + 1} to this stack. It inherits the audience and settings, and viewers can switch between versions.
             </p>
             <VideoUploader stackId={video.stackId} label={`Upload v${stack.length + 1}`} />
           </div>

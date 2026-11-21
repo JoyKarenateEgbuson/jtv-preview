@@ -1,6 +1,6 @@
 import Logo from "@/components/Logo";
 
-export const metadata = { title: "Privacy · The Joie TV Reviews" };
+export const metadata = { title: "Privacy · The Joie TV Preview" };
 
 export default function Privacy() {
   return (
@@ -8,16 +8,16 @@ export default function Privacy() {
       <Logo height={34} />
       <h1 className="text-2xl font-bold">Privacy policy</h1>
       <p className="text-cream/80">
-        reviews.thejoietv.com is a private portal where The Joie TV shares videos with clients and collaborators for feedback.
+        preview.thejoietv.com is a private portal where The Joie TV shares videos with clients and collaborators for feedback.
       </p>
       <h2 className="pt-2 text-lg font-semibold">What we collect</h2>
       <p className="text-cream/80">
-        The name you are given or enter when opening a review link, and the comments you write. Your name is shown on the
+        The name you are given or enter when opening a link, and the comments you write. Your name is shown on the
         video as a watermark and next to your comments.
       </p>
       <h2 className="pt-2 text-lg font-semibold">How it is used</h2>
       <p className="text-cream/80">
-        Only to run the review: showing feedback to The Joie TV team and to others reviewing the same video. We do not sell
+        Only to run the preview: showing feedback to The Joie TV team and to others watching the same video. We do not sell
         data, run ads, or use analytics trackers.
       </p>
       <h2 className="pt-2 text-lg font-semibold">Where it is stored</h2>

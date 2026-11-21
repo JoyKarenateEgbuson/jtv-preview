@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** Copies the full URL for a site path (works on any domain, incl. reviews.thejoietv.com). */
+/** Copies the full URL for a site path (works on any domain, incl. preview.thejoietv.com). */
 export default function CopyButton({ path, label = "Copy link" }: { path: string; label?: string }) {
   const [done, setDone] = useState(false);
   return (

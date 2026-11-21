@@ -1,4 +1,4 @@
-# Deploying to Cloudflare (reviews.thejoietv.com)
+# Deploying to Cloudflare (preview.thejoietv.com)
 
 The app is already built and tested for Cloudflare Workers (see "What was tested"). Deploying needs a Cloudflare login, so it is a manual step.
 
@@ -13,13 +13,13 @@ Cloudflare only attaches a custom domain to a Worker when the Worker and the dom
 
 For option A he goes to **Manage Account → Members → Invite**, enters your Google email, and gives these roles only (not Administrator):
 - **Workers Platform Admin** (to deploy the Worker)
-- **DNS** (to add the `reviews` record and certificate)
+- **DNS** (to add the `preview` record and certificate)
 
 He should have two-factor login on his account, since it holds the whole domain.
 
 ### Message to send him
 
-> Hey, I'm hosting the Joie TV review site on Cloudflare at reviews.thejoietv.com. Cloudflare only lets me attach that address if I'm a member of the account that owns thejoietv.com. Could you invite me under Manage Account > Members with just two roles: "Workers Platform Admin" and "DNS" (please don't give me Administrator)? Use my Google email. Thanks!
+> Hey, I'm hosting the Joie TV preview site on Cloudflare at preview.thejoietv.com. Cloudflare only lets me attach that address if I'm a member of the account that owns thejoietv.com. Could you invite me under Manage Account > Members with just two roles: "Workers Platform Admin" and "DNS" (please don't give me Administrator)? Use my Google email. Thanks!
 
 ## Deploy steps (once you're a member)
 
@@ -29,12 +29,12 @@ He should have two-factor login on his account, since it holds the whole domain.
    ```
    If you belong to more than one account, pick his when asked.
 2. Tell Claude you're a member. Claude will:
-   - add the `reviews.thejoietv.com` route to `wrangler.jsonc`,
+   - add the `preview.thejoietv.com` route to `wrangler.jsonc`,
    - generate a **fresh production** admin password and session secret (not the dev ones),
    - upload your settings to Cloudflare as secrets, without printing them,
    - run `npm run deploy`.
-3. Open `https://reviews.thejoietv.com`. Cloudflare creates the DNS record and HTTPS certificate itself.
-4. Switch the privacy link in Google (**Auth Platform → Branding**) to `https://reviews.thejoietv.com/privacy`.
+3. Open `https://preview.thejoietv.com`. Cloudflare creates the DNS record and HTTPS certificate itself.
+4. Switch the privacy link in Google (**Auth Platform → Branding**) to `https://preview.thejoietv.com/privacy`.
 
 ## What was tested
 

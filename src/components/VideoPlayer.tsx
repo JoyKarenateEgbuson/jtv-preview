@@ -244,7 +244,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black p-6 text-center">
           <p className="text-lg font-semibold text-sun">Playback stopped</p>
           <p className="max-w-sm text-sm text-cream/70">
-            The review watermark was removed or hidden. Reload the page to keep watching.
+            The watermark was removed or hidden. Reload the page to keep watching.
           </p>
         </div>
       )}

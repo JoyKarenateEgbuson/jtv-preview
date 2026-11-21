@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Joie TV Reviews",
-  description: "Private video review portal for The Joie TV.",
+  title: "The Joie TV Preview",
+  description: "Private video preview portal for The Joie TV.",
   robots: { index: false, follow: false },
 };
 
