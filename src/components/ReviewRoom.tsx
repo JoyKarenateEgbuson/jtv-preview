@@ -380,14 +380,14 @@ export default function ReviewRoom(p: Props) {
           ))}
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        <div data-lenis-prevent className="flex-1 space-y-3 overflow-y-auto p-4">
           {shown.length === 0 && (
             <p className="py-8 text-center text-sm text-stone">
               {top.length === 0 ? "No comments yet. Pause the video and add the first one." : "Nothing in this filter."}
             </p>
           )}
           {shown.map((c) => (
-            <div key={c.id} className={`rounded-lg border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-white/[0.03]"} ${c.resolved ? "opacity-70" : ""}`}>
+            <div key={c.id} className={`comment-in rounded-lg border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-white/[0.03]"} ${c.resolved ? "opacity-70" : ""}`}>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"

@@ -159,7 +159,7 @@ export default function FolderMenu({ folder, people, counts, afterDelete, always
           {people.length === 0 ? (
             <p className="text-sm text-stone">No clients yet. Add one under Clients first.</p>
           ) : (
-            <div className="max-h-64 space-y-1.5 overflow-y-auto">
+            <div data-lenis-prevent className="max-h-64 space-y-1.5 overflow-y-auto">
               {people.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input
