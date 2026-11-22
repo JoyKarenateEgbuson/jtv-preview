@@ -70,4 +70,11 @@ export function randomToken(bytes = 24): string {
   return b64url(crypto.getRandomValues(new Uint8Array(bytes)));
 }
 
+/**
+ * The secret part of a share link or client page link. 8 random bytes = 11 characters and
+ * 64 bits of randomness (about 18 quintillion possibilities), which is impossible to guess
+ * but far shorter than before. Older, longer links keep working: lookups match the exact text.
+ */
+export const linkCode = () => randomToken(8);
+
 export const newId = () => crypto.randomUUID();

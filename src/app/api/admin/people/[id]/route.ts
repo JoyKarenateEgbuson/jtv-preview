@@ -1,4 +1,4 @@
-import { randomToken } from "@/lib/crypto";
+import { linkCode } from "@/lib/crypto";
 import { deletePerson, getPerson, updatePerson } from "@/lib/repo";
 import { adminDenied } from "@/lib/session";
 
@@ -16,7 +16,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (b.name?.trim()) patch.name = b.name.trim().slice(0, 80);
   if (b.kind === "client" || b.kind === "guest") patch.kind = b.kind;
   // Regenerating invalidates the old private page URL.
-  if (b.regenerateLink) patch.token = randomToken();
+  if (b.regenerateLink) patch.token = linkCode();
   await updatePerson(id, patch);
   return Response.json(await getPerson(id));
 }

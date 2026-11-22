@@ -1,4 +1,4 @@
-import { newId, randomToken } from "./crypto";
+import { linkCode, newId } from "./crypto";
 import { store } from "./db/store";
 import type { Comment, Person, ShareLink, Video } from "./types";
 
@@ -16,7 +16,7 @@ export async function getPersonByToken(token: string): Promise<Person | null> {
 }
 
 export async function createPerson(name: string, kind: Person["kind"]): Promise<Person> {
-  const person: Person = { id: newId(), name, kind, token: randomToken(), createdAt: Date.now() };
+  const person: Person = { id: newId(), name, kind, token: linkCode(), createdAt: Date.now() };
   await store().set("people", person);
   return person;
 }
@@ -106,7 +106,7 @@ export async function getLinkByToken(token: string): Promise<ShareLink | null> {
 export async function createLink(
   input: Pick<ShareLink, "videoId" | "label" | "viewerName" | "expiresAt">,
 ): Promise<ShareLink> {
-  const link: ShareLink = { id: newId(), token: randomToken(), createdAt: Date.now(), ...input };
+  const link: ShareLink = { id: newId(), token: linkCode(), createdAt: Date.now(), ...input };
   await store().set("links", link);
   return link;
 }
