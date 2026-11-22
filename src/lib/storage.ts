@@ -65,10 +65,17 @@ export async function initUpload(opts: {
 
 export async function removeFile(video: Video) {
   if (video.storage === "drive") {
-    await fetch(`${DRIVE}/files/${video.fileRef}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${await driveToken()}` },
+    // Move the file to Drive's Trash instead of erasing it, so a mistaken delete can be
+    // restored from drive.google.com for 30 days. (Trashed files still count toward storage
+    // until the Trash is emptied.)
+    const res = await fetch(`${DRIVE}/files/${encodeURIComponent(video.fileRef)}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${await driveToken()}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ trashed: true }),
     });
+    if (!res.ok && res.status !== 404) {
+      throw new Error(`Could not move the file to Drive's Trash: ${res.status} ${await res.text()}`);
+    }
   } else if (isValidLocalRef(video.fileRef)) {
     await (await import("./storage-local")).removeLocalFile(video.fileRef);
   }

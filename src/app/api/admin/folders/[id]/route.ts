@@ -64,6 +64,14 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   const { id } = await ctx.params;
   if (!(await getFolder(id))) return Response.json({ error: "Not found" }, { status: 404 });
   const removed = await deleteFolderTree(id);
-  for (const v of removed) await removeFile(v).catch(() => undefined);
-  return Response.json({ ok: true, videosDeleted: removed.length });
+  // The files go to Drive's Trash (recoverable for 30 days). Count any that could not be moved.
+  let filesNotTrashed = 0;
+  for (const v of removed) {
+    try {
+      await removeFile(v);
+    } catch {
+      filesNotTrashed++;
+    }
+  }
+  return Response.json({ ok: true, videosDeleted: removed.length, filesNotTrashed });
 }
