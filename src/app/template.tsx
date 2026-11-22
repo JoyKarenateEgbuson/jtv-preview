@@ -24,7 +24,9 @@ export default function Template({ children }: { children: ReactNode }) {
   return (
     <>
       {mode === "sweep" && <div aria-hidden className="jtv-sweep-panel" />}
-      <div className={`page-in-${mode}`}>{children}</div>
+      {/* flex-1 + flex column: pages lay themselves out against the full window height (e.g. centred
+          screens), exactly as they did before this wrapper existed. */}
+      <div className={`page-in-${mode} flex flex-1 flex-col`}>{children}</div>
     </>
   );
 }

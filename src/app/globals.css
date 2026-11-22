@@ -103,11 +103,9 @@ input[type="range"].speed {
 
 /* ---------- Motion, matched to thejoietv.com ---------- */
 
-/* Smooth scroll (Lenis) */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
+/* Smooth scroll (Lenis).
+   Note: thejoietv.com also sets `html.lenis, html.lenis body { height: auto }`. Don't copy that here:
+   this app keeps the page exactly one window tall (html h-full + body min-h-full) so screens can centre. */
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
