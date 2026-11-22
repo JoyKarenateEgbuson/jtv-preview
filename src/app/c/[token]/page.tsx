@@ -1,52 +1,36 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import FolderBrowser from "@/components/FolderBrowser";
 import Logo from "@/components/Logo";
-import { getPersonByToken, listVideos } from "@/lib/repo";
-import type { Video } from "@/lib/types";
+import { descendantIds, latestPerStack, looseVideosFor, natural, sharedRootFolders } from "@/lib/folders";
+import { getPersonByToken, listFolders, listVideos } from "@/lib/repo";
 
-// A client's private page: everything shared with them, newest version of each piece.
+// A client's private page: the folders shared with them, plus any videos shared one by one.
 export default async function ClientPortal({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const person = await getPersonByToken(token);
   if (!person) notFound();
 
-  const mine = (await listVideos()).filter((v) => v.personIds.includes(person.id));
-  const stacks = new Map<string, Video[]>();
-  for (const v of mine) stacks.set(v.stackId, [...(stacks.get(v.stackId) ?? []), v]);
-  const cards = [...stacks.values()]
-    .map((vs) => vs.sort((a, b) => b.version - a.version))
-    .sort((a, b) => b[0].createdAt - a[0].createdAt);
+  const [folders, videos] = await Promise.all([listFolders(), listVideos()]);
+  const roots = sharedRootFolders(person.id, folders).sort((a, b) => natural(a.name, b.name));
+  const loose = latestPerStack(looseVideosFor(person.id, folders, videos)).sort((a, b) => natural(a.title, b.title));
+  const countIn = (folderId: string) => {
+    const ids = descendantIds(folders, folderId);
+    return latestPerStack(videos.filter((v) => v.folderId && ids.includes(v.folderId))).length;
+  };
 
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-5xl items-center px-4 py-3"><Logo height={40} /></div>
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-3"><Logo height={40} /></div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-bold">Hi {person.name} 👋</h1>
-        <p className="mt-1 text-cream/70">Here&apos;s what&apos;s ready for you to watch.</p>
-
-        {cards.length === 0 ? (
-          <p className="py-16 text-center text-stone">Nothing has been shared with you yet.</p>
-        ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map(([latest, ...older]) => (
-              <Link key={latest.id} href={`/c/${token}/v/${latest.id}`} className="card block overflow-hidden transition hover:border-brand">
-                <div className="grid aspect-video place-items-center bg-gradient-to-br from-magenta/40 via-ink to-brand/40">
-                  <svg viewBox="0 0 24 24" className="h-12 w-12 fill-cream/90"><path d="M8 5v14l11-7z" /></svg>
-                </div>
-                <div className="p-4">
-                  <p className="truncate font-semibold">{latest.title}</p>
-                  <p className="mt-1 text-xs text-stone">
-                    Version {latest.version}
-                    {older.length > 0 && ` · ${older.length} earlier`}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
+      <FolderBrowser
+        crumbs={[]}
+        title={`Hi ${person.name} 👋`}
+        subtitle="Here's what's ready for you to watch."
+        folders={roots.map((f) => ({ id: f.id, name: f.name, videos: countIn(f.id), href: `/c/${token}/f/${f.id}` }))}
+        videos={loose.map((v) => ({ id: v.id, title: v.title, versions: v.version, href: `/c/${token}/v/${v.id}` }))}
+        empty="Nothing has been shared with you yet."
+      />
     </>
   );
 }

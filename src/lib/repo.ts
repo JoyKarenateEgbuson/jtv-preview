@@ -1,6 +1,7 @@
 import { linkCode, newId } from "./crypto";
 import { store } from "./db/store";
-import type { Comment, Person, ShareLink, Video } from "./types";
+import { descendantIds } from "./folders";
+import type { Comment, Folder, Person, ShareLink, Video } from "./types";
 
 const byNewest = <T extends { createdAt: number }>(a: T, b: T) => b.createdAt - a.createdAt;
 
@@ -26,10 +27,15 @@ export const updatePerson = (id: string, patch: Partial<Pick<Person, "name" | "k
 
 export async function deletePerson(id: string) {
   await store().remove("people", id);
-  // Un-share from any video that referenced them.
+  // Un-share from any video or folder that referenced them.
   for (const v of await listVideos()) {
     if (v.personIds.includes(id)) {
       await updateVideo(v.id, { personIds: v.personIds.filter((p) => p !== id) });
+    }
+  }
+  for (const f of await listFolders()) {
+    if (f.personIds.includes(id)) {
+      await updateFolder(f.id, { personIds: f.personIds.filter((p) => p !== id) });
     }
   }
 }
@@ -48,18 +54,23 @@ export async function listStack(stackId: string): Promise<Video[]> {
 }
 
 export async function createVideo(
-  input: Pick<Video, "title" | "storage" | "fileRef" | "mimeType" | "size"> & { stackId?: string },
+  input: Pick<Video, "title" | "storage" | "fileRef" | "mimeType" | "size"> & {
+    stackId?: string;
+    folderId?: string | null;
+  },
 ): Promise<Video> {
   let version = 1;
   let personIds: string[] = [];
   let carry: Partial<Video> = {};
+  let folderId = input.folderId ?? null;
   if (input.stackId) {
     const stack = await listStack(input.stackId);
     const latest = stack[stack.length - 1];
     if (latest) {
       version = latest.version + 1;
-      // A new version inherits the previous version's audience and settings.
+      // A new version inherits the previous version's audience, settings and folder.
       personIds = latest.personIds;
+      folderId = latest.folderId ?? null;
       carry = { fps: latest.fps, watermark: latest.watermark, allowDownload: latest.allowDownload };
     }
   }
@@ -67,6 +78,7 @@ export async function createVideo(
   const video: Video = {
     id,
     title: input.title,
+    folderId,
     stackId: input.stackId ?? id,
     version,
     storage: input.storage,
@@ -93,10 +105,51 @@ export async function deleteVideoRecords(id: string) {
   await store().remove("videos", id);
 }
 
+/* ---------- folders ---------- */
+
+export async function listFolders(): Promise<Folder[]> {
+  return (await store().list<Folder>("folders")).sort(byNewest);
+}
+export const getFolder = (id: string) => store().get<Folder>("folders", id);
+
+/** Creates a folder, or returns the existing one with the same name in the same place (so re-uploading merges). */
+export async function createFolder(name: string, parentId: string | null): Promise<Folder> {
+  const existing = (await listFolders()).find(
+    (f) => (f.parentId ?? null) === parentId && f.name.toLowerCase() === name.toLowerCase(),
+  );
+  if (existing) return existing;
+  const folder: Folder = { id: newId(), name, parentId, personIds: [], createdAt: Date.now() };
+  await store().set("folders", folder);
+  return folder;
+}
+
+export const updateFolder = (id: string, patch: Partial<Pick<Folder, "name" | "parentId" | "personIds">>) =>
+  store().update("folders", id, patch);
+
+/**
+ * Deletes a folder and everything inside it: subfolders, videos, comments and links.
+ * Returns the videos that were removed, so the caller can also delete their files.
+ */
+export async function deleteFolderTree(id: string): Promise<Video[]> {
+  const folders = await listFolders();
+  const ids = descendantIds(folders, id);
+  const videos = (await listVideos()).filter((v) => v.folderId && ids.includes(v.folderId));
+  for (const v of videos) await deleteVideoRecords(v.id);
+  for (const fid of ids) {
+    for (const l of await listFolderLinks(fid)) await store().remove("links", l.id);
+    await store().remove("folders", fid);
+  }
+  return videos;
+}
+
 /* ---------- share links ---------- */
 
 export async function listLinks(videoId: string): Promise<ShareLink[]> {
   return (await store().list<ShareLink>("links", { field: "videoId", value: videoId })).sort(byNewest);
+}
+
+export async function listFolderLinks(folderId: string): Promise<ShareLink[]> {
+  return (await store().list<ShareLink>("links", { field: "folderId", value: folderId })).sort(byNewest);
 }
 
 export async function getLinkByToken(token: string): Promise<ShareLink | null> {
@@ -104,9 +157,16 @@ export async function getLinkByToken(token: string): Promise<ShareLink | null> {
 }
 
 export async function createLink(
-  input: Pick<ShareLink, "videoId" | "label" | "viewerName" | "expiresAt">,
+  input: Pick<ShareLink, "label" | "viewerName" | "expiresAt"> & { videoId?: string; folderId?: string | null },
 ): Promise<ShareLink> {
-  const link: ShareLink = { id: newId(), token: linkCode(), createdAt: Date.now(), ...input };
+  const link: ShareLink = {
+    id: newId(),
+    token: linkCode(),
+    createdAt: Date.now(),
+    ...input,
+    videoId: input.videoId ?? "",
+    folderId: input.folderId ?? null,
+  };
   await store().set("links", link);
   return link;
 }

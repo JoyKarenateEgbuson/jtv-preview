@@ -35,7 +35,16 @@ const folderInputProps = { webkitdirectory: "", directory: "" } as unknown as In
  * folders) are searched for videos, which upload one after another in natural order.
  * With `stackId` it adds a single new version of that video instead.
  */
-export default function VideoUploader({ stackId, label = "Upload videos" }: { stackId?: string; label?: string }) {
+export default function VideoUploader({
+  stackId,
+  label = "Upload videos",
+  folderId = null,
+}: {
+  stackId?: string;
+  label?: string;
+  /** Upload into this folder (the folder page passes its own id). Dropped folders become subfolders of it. */
+  folderId?: string | null;
+}) {
   const router = useRouter();
   const filesInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
@@ -43,7 +52,7 @@ export default function VideoUploader({ stackId, label = "Upload videos" }: { st
   const [percent, setPercent] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  async function uploadOne(item: PickedFile, n: number, total: number) {
+  async function uploadOne(item: PickedFile, n: number, total: number, targetFolderId: string | null) {
     const { file } = item;
     const prefix = total > 1 ? `(${n}/${total}) ` : "";
     setStatus(`${prefix}Preparing ${file.name}…`);
@@ -100,9 +109,32 @@ export default function VideoUploader({ stackId, label = "Upload videos" }: { st
         mimeType,
         size: file.size,
         stackId,
+        folderId: targetFolderId,
       }),
     });
     if (!reg.ok) throw new Error(((await reg.json()) as { error?: string }).error ?? "Could not save video");
+  }
+
+  /** Makes (or finds) the folder for a path like ["Podcast", "Season 1"], one level at a time. */
+  async function ensureFolders(dirs: string[], cache: Map<string, string>): Promise<string | null> {
+    let parent = folderId;
+    let key = "";
+    for (const dir of dirs) {
+      key += `/${dir}`;
+      let id = cache.get(key);
+      if (!id) {
+        const res = await fetch("/api/admin/folders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: dir, parentId: parent }),
+        });
+        if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? "Could not create folder");
+        id = ((await res.json()) as { id: string }).id;
+        cache.set(key, id);
+      }
+      parent = id;
+    }
+    return parent;
   }
 
   /** Takes whatever was picked or dropped, keeps the videos, and uploads them one by one. */
@@ -123,15 +155,23 @@ export default function VideoUploader({ stackId, label = "Upload videos" }: { st
       // A new version is one file; take the first if several were given.
       const queue = stackId ? videos.slice(0, 1) : videos;
       const failed: string[] = [];
+      const folderCache = new Map<string, string>();
+      const topFolders = new Set<string>();
       for (let i = 0; i < queue.length; i++) {
         try {
-          await uploadOne(queue[i], i + 1, queue.length);
+          // A video that came from a folder goes into the matching folder; loose files go where we are.
+          const dirs = stackId ? [] : queue[i].path.split("/").slice(0, -1).filter(Boolean);
+          if (dirs[0]) topFolders.add(dirs[0]);
+          setStatus(dirs.length ? `Setting up folder “${dirs.join(" › ")}”…` : "Preparing…");
+          const target = dirs.length ? await ensureFolders(dirs, folderCache) : folderId;
+          await uploadOne(queue[i], i + 1, queue.length, target);
         } catch (e) {
           failed.push(`${queue[i].file.name} (${(e as Error).message})`);
         }
       }
       const ok = queue.length - failed.length;
       const notes = [
+        topFolders.size ? `in folder${topFolders.size > 1 ? "s" : ""} ${[...topFolders].map((n) => `“${n}”`).join(", ")}` : "",
         skipped ? `${skipped} non-video file${skipped > 1 ? "s" : ""} skipped` : "",
         stackId && videos.length > 1 ? "only the first video was used for this version" : "",
       ].filter(Boolean);
@@ -204,7 +244,7 @@ export default function VideoUploader({ stackId, label = "Upload videos" }: { st
       <p className="mt-2 text-xs text-stone">
         {stackId
           ? "or drag a video here. Use an H.264 MP4 export so it plays in every browser."
-          : "or drag and drop videos, or a whole folder of videos. Use H.264 MP4 exports so they play in every browser."}
+          : "or drag and drop videos, or a whole folder: a folder becomes a folder here, with its subfolders. Use H.264 MP4 exports so they play in every browser."}
       </p>
       {status && (
         <div className="mt-3">

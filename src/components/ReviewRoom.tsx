@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatDate, formatTc, snapToFrame } from "@/lib/time";
 import type { Comment, Role } from "@/lib/types";
@@ -17,6 +18,10 @@ type Props = {
   watermarkName: string | null;
   canDownload: boolean;
   versions: { id: string; label: string; href: string }[];
+  /** The other videos in the same folder, in play order (this one included). */
+  nav?: { items: { id: string; title: string; href: string }[]; currentId: string } | null;
+  /** Start playing right away (set when arriving from "up next"). */
+  autoPlay?: boolean;
 };
 
 type Filter = "all" | "open" | "resolved";
@@ -40,8 +45,20 @@ export default function ReviewRoom(p: Props) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const src = `/api/stream/${p.videoId}?t=${encodeURIComponent(p.token)}`;
+  const router = useRouter();
+  // The video address is fixed for the life of the page, so changing your name (which makes a
+  // fresh token) never restarts the video you're watching.
+  const [src] = useState(() => `/api/stream/${p.videoId}?t=${encodeURIComponent(p.token)}`);
   const q = `t=${encodeURIComponent(p.token)}`;
+
+  // Where "next" and "previous" lead, from the folder's play order.
+  const navItems = p.nav?.items ?? [];
+  const navIndex = p.nav ? navItems.findIndex((i) => i.id === p.nav!.currentId) : -1;
+  const prevItem = navIndex > 0 ? navItems[navIndex - 1] : null;
+  const nextItem = navIndex >= 0 && navIndex < navItems.length - 1 ? navItems[navIndex + 1] : null;
+  const goNext = nextItem
+    ? () => router.push(`${nextItem.href}${nextItem.href.includes("?") ? "&" : "?"}autoplay=1`)
+    : null;
   const isAdmin = p.role === "admin";
   const isOwn = (c: Comment) => c.author === p.viewerName && c.role === p.role;
 
@@ -264,7 +281,7 @@ export default function ReviewRoom(p: Props) {
   const openCount = top.filter((c) => !c.resolved).length;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div>
       <div className="min-w-0">
         <VideoPlayer
           ref={playerRef}
@@ -276,6 +293,8 @@ export default function ReviewRoom(p: Props) {
           onTime={onTime}
           canSaveStill={p.canDownload}
           stillName={p.title}
+          autoPlay={p.autoPlay}
+          next={nextItem && goNext ? { title: nextItem.title, go: goNext } : null}
         />
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-bold">{p.title}</h1>
@@ -303,9 +322,42 @@ export default function ReviewRoom(p: Props) {
         <p className="mt-1 text-xs text-stone">
           Space play/pause · ← → step one frame · Shift+← → jump 5s · F fullscreen
         </p>
+
+        {navItems.length > 1 && (
+          <div className="mt-3">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              {prevItem ? (
+                <Link href={prevItem.href} className="btn btn-ghost !px-3 !py-1.5">‹ Previous</Link>
+              ) : (
+                <span className="btn btn-ghost pointer-events-none !px-3 !py-1.5 opacity-40">‹ Previous</span>
+              )}
+              <span className="text-cream/70">{navIndex + 1} of {navItems.length}</span>
+              {nextItem ? (
+                <Link href={nextItem.href} className="btn btn-ghost !px-3 !py-1.5">Next ›</Link>
+              ) : (
+                <span className="btn btn-ghost pointer-events-none !px-3 !py-1.5 opacity-40">Next ›</span>
+              )}
+            </div>
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1" aria-label="Videos in this folder">
+              {navItems.map((it) => (
+                <Link
+                  key={it.id}
+                  href={it.href}
+                  aria-current={it.id === p.nav?.currentId ? "page" : undefined}
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                    it.id === p.nav?.currentId ? "bg-brand text-ink" : "border border-line text-cream/70 hover:bg-panel"
+                  }`}
+                >
+                  {it.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      <aside className="card flex max-h-[75vh] min-h-[420px] flex-col overflow-hidden lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem)] lg:max-h-none">
+      {/* On wide screens the comments sit in a full-height column down the right edge of the window. */}
+      <aside className="card mt-4 flex max-h-[75vh] min-h-[420px] flex-col overflow-hidden lg:fixed lg:inset-y-0 lg:right-0 lg:z-20 lg:mt-0 lg:h-dvh lg:max-h-none lg:w-[380px] lg:rounded-none lg:border-y-0 lg:border-r-0">
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <h2 className="font-semibold">
             Comments <span className="text-stone">· {openCount} open</span>

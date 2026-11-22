@@ -10,9 +10,21 @@ export type Person = {
   createdAt: number;
 };
 
+/** A folder of videos. Folders can contain other folders (parentId), and can be shared with clients. */
+export type Folder = {
+  id: string;
+  name: string;
+  parentId: string | null;
+  /** People this folder (and everything inside it) is shared with. */
+  personIds: string[];
+  createdAt: number;
+};
+
 export type Video = {
   id: string;
   title: string;
+  /** Which folder it sits in; empty/absent means the top level. */
+  folderId?: string | null;
   /** All versions of the same piece share a stackId. */
   stackId: string;
   version: number;
@@ -32,7 +44,10 @@ export type Video = {
 export type ShareLink = {
   id: string;
   token: string;
+  /** The single video this link opens (empty for folder links). */
   videoId: string;
+  /** Set for a folder link: opens that folder, its subfolders and every video inside. */
+  folderId?: string | null;
   label: string;
   /** If set, this name goes on the watermark and comments. Otherwise the viewer is asked. */
   viewerName: string;

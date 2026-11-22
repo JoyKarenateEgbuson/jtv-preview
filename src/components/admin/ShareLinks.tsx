@@ -6,7 +6,16 @@ import { formatDate, isExpired } from "@/lib/time";
 import type { ShareLink } from "@/lib/types";
 import CopyButton from "../CopyButton";
 
-export default function ShareLinks({ videoId, links }: { videoId: string; links: ShareLink[] }) {
+/** Share links for one video, or for a whole folder (pass `folderId`). */
+export default function ShareLinks({
+  videoId,
+  folderId,
+  links,
+}: {
+  videoId?: string;
+  folderId?: string;
+  links: ShareLink[];
+}) {
   const router = useRouter();
   const [label, setLabel] = useState("");
   const [viewerName, setViewerName] = useState("");
@@ -18,7 +27,7 @@ export default function ShareLinks({ videoId, links }: { videoId: string; links:
     await fetch("/api/admin/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ videoId, label, viewerName, expiresInDays: Number(days) }),
+      body: JSON.stringify({ videoId, folderId, label, viewerName, expiresInDays: Number(days) }),
     });
     setBusy(false);
     setLabel("");
@@ -36,12 +45,13 @@ export default function ShareLinks({ videoId, links }: { videoId: string; links:
     <div className="card space-y-4 p-5">
       <h2 className="font-semibold">Share links</h2>
       <p className="text-xs text-stone">
-        For people who aren&apos;t clients. Always watermarked, never downloadable. Leave the name blank and the viewer is asked for theirs.
+        For people who aren&apos;t clients. Always watermarked, never downloadable.{" "}
+        <b>Sending to a group?</b> Leave the name empty: each person is asked for their own name the first time (and can change it later), so you can tell whose comment is whose.
       </p>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <input className="field" placeholder="Label (e.g. Sent to Ada)" value={label} onChange={(e) => setLabel(e.target.value)} />
-        <input className="field" placeholder="Viewer name (optional)" value={viewerName} onChange={(e) => setViewerName(e.target.value)} />
+        <input className="field" placeholder="Label (e.g. Sent to LLA)" value={label} onChange={(e) => setLabel(e.target.value)} />
+        <input className="field" placeholder="Fixed name (optional)" value={viewerName} onChange={(e) => setViewerName(e.target.value)} />
         <select className="field" value={days} onChange={(e) => setDays(e.target.value)}>
           <option value="1">Expires in 1 day</option>
           <option value="7">Expires in 7 days</option>

@@ -33,6 +33,10 @@ type Props = {
   /** Show "Download still" (only for people who are allowed to download). */
   canSaveStill: boolean;
   stillName: string;
+  /** Start playing as soon as the video is ready (used when arriving from "up next"). */
+  autoPlay?: boolean;
+  /** The next video in the folder, if any. When this one ends, it can play automatically. */
+  next?: { title: string; go: () => void } | null;
 };
 
 type Zoom = "fit" | "fill" | "native";
@@ -57,7 +61,7 @@ const Icon = ({ children, className = "h-5 w-5" }: { children: ReactNode; classN
 );
 
 const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, fps, watermarkName, markers, rangePreview, onTime, canSaveStill, stillName },
+  { src, fps, watermarkName, markers, rangePreview, onTime, canSaveStill, stillName, autoPlay, next },
   ref,
 ) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -84,6 +88,32 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   const [guides, setGuides] = useState<Guides>("off");
   const [area, setArea] = useState({ w: 0, h: 0 });
   const [vsize, setVsize] = useState({ w: 0, h: 0 });
+  // "Autoplay next video": on by default, remembered on this device.
+  const [autoNext, setAutoNext] = useState(() => {
+    try {
+      return localStorage.getItem("jtv-autonext") !== "off";
+    } catch {
+      return true;
+    }
+  });
+  const [upNext, setUpNext] = useState<number | null>(null); // seconds left before the next video starts
+  const nextRef = useRef(next);
+  const autoPlayed = useRef(false);
+
+  useEffect(() => {
+    nextRef.current = next;
+  }, [next]);
+
+  /* Count down, then move to the next video. */
+  useEffect(() => {
+    if (upNext === null) return;
+    if (upNext <= 0) {
+      nextRef.current?.go();
+      return;
+    }
+    const t = window.setTimeout(() => setUpNext((n) => (n === null ? null : n - 1)), 1000);
+    return () => window.clearTimeout(t);
+  }, [upNext]);
 
   /* The browser can finish loading the video's metadata before React attaches the
      event handlers below (fast connections, cached video), so we'd never hear about
@@ -378,8 +408,21 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           disableRemotePlayback
           onContextMenu={(e) => e.preventDefault()}
           onClick={togglePlay}
-          onPlay={() => setPlaying(true)}
+          onPlay={() => {
+            setPlaying(true);
+            setUpNext(null);
+          }}
           onPause={() => setPlaying(false)}
+          onEnded={() => {
+            if (nextRef.current && autoNext) setUpNext(4);
+          }}
+          onCanPlay={() => {
+            const v = videoRef.current;
+            if (autoPlay && v && !autoPlayed.current) {
+              autoPlayed.current = true;
+              void v.play().catch(() => undefined); // if the browser refuses, the play button is still there
+            }
+          }}
           onPlaying={() => (retries.current = 0)}
           onError={onVideoError}
           onLoadedMetadata={(e) => {
@@ -434,6 +477,20 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <p className="max-w-sm text-sm text-cream/70">
               The watermark was removed or hidden. Reload the page to keep watching.
             </p>
+          </div>
+        )}
+
+        {upNext !== null && next && !blocked && (
+          <div className="absolute inset-0 z-20 grid place-items-center bg-black/80 p-6 text-center">
+            <div>
+              <p className="text-sm text-cream/70">Up next</p>
+              <p className="mt-1 text-xl font-bold">{next.title}</p>
+              <p className="mt-2 text-sm text-cream/70">Playing in {Math.max(upNext, 0)}…</p>
+              <div className="mt-4 flex justify-center gap-2">
+                <button type="button" className="btn" onClick={() => next.go()}>Play now</button>
+                <button type="button" className="btn btn-ghost" onClick={() => setUpNext(null)}>Cancel</button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -616,6 +673,23 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
                     ))}
                   </div>
                 </div>
+                {next && (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={autoNext}
+                      onChange={(e) => {
+                        setAutoNext(e.target.checked);
+                        try {
+                          localStorage.setItem("jtv-autonext", e.target.checked ? "on" : "off");
+                        } catch {
+                          /* private mode: the choice just isn't remembered */
+                        }
+                      }}
+                    />
+                    Autoplay the next video
+                  </label>
+                )}
                 {canSaveStill && (
                   <button type="button" className="btn btn-ghost w-full" onClick={saveStill}>
                     Download still of this frame

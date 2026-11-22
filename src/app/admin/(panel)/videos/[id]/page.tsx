@@ -6,25 +6,54 @@ import VideoUploader from "@/components/admin/VideoUploader";
 import ReviewRoom from "@/components/ReviewRoom";
 import { mintViewerToken, permsFor } from "@/lib/access";
 import { adminName } from "@/lib/config";
-import { getVideo, listLinks, listPeople, listStack } from "@/lib/repo";
+import { episodesIn, folderChain } from "@/lib/folders";
+import { getVideo, listFolders, listLinks, listPeople, listStack, listVideos } from "@/lib/repo";
 import { requireAdminPage } from "@/lib/session";
 
-export default async function AdminVideoPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminVideoPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ autoplay?: string }>;
+}) {
   await requireAdminPage();
   const { id } = await params;
+  const { autoplay } = await searchParams;
   const video = await getVideo(id);
   if (!video) notFound();
 
-  const [people, links, stack] = await Promise.all([listPeople(), listLinks(id), listStack(video.stackId)]);
+  const [people, links, stack, folders, allVideos] = await Promise.all([
+    listPeople(),
+    listLinks(id),
+    listStack(video.stackId),
+    listFolders(),
+    listVideos(),
+  ]);
   const name = adminName();
   const token = await mintViewerToken(video, { role: "admin", name });
   const perms = permsFor("admin", video);
 
+  const chain = folderChain(folders, video.folderId);
+  const items = video.folderId
+    ? episodesIn(allVideos, video.folderId).map((v) => ({ id: v.id, stackId: v.stackId, title: v.title, href: `/admin/videos/${v.id}` }))
+    : [];
+  const current = items.find((i) => i.stackId === video.stackId);
+
   return (
-    <div className="space-y-8">
-      <Link href="/admin" className="text-sm text-cream/60 hover:text-cream">← All videos</Link>
+    <div className="space-y-8 lg:pr-[380px]">
+      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-cream/60" aria-label="Breadcrumb">
+        <Link href="/admin" className="hover:text-cream">All videos</Link>
+        {chain.map((f) => (
+          <span key={f.id} className="flex items-center gap-1.5">
+            <span>›</span>
+            <Link href={`/admin/folders/${f.id}`} className="hover:text-cream">{f.name}</Link>
+          </span>
+        ))}
+      </nav>
 
       <ReviewRoom
+        key={video.id}
         token={token}
         videoId={video.id}
         title={video.title}
@@ -34,6 +63,8 @@ export default async function AdminVideoPage({ params }: { params: Promise<{ id:
         watermarkName={video.watermark ? name : null}
         canDownload={perms.download}
         versions={stack.map((v) => ({ id: v.id, label: `v${v.version}`, href: `/admin/videos/${v.id}` }))}
+        nav={items.length > 1 && current ? { items: items.map(({ id: i, title, href }) => ({ id: i, title, href })), currentId: current.id } : null}
+        autoPlay={autoplay === "1"}
       />
 
       <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-2">
