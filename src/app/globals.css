@@ -3,13 +3,13 @@
 /* The Joie TV palette */
 :root {
   --ink: #000000;
-  --panel: #0e0e11;
-  --line: #25262c;
-  --cream: #f5eedc;
+  --panel: #111111;
+  --line: #262626;
+  --cream: #ffffff;
   --brand: #ff7a00;
   --magenta: #c6249b;
   --sun: #ffd34a;
-  --stone: #8a857d;
+  --stone: #9a9a9a;
 }
 
 @theme inline {
@@ -21,7 +21,8 @@
   --color-magenta: var(--magenta);
   --color-sun: var(--sun);
   --color-stone: var(--stone);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -32,7 +33,7 @@ html {
 body {
   background: var(--ink);
   color: var(--cream);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-body), 'Inter', system-ui, sans-serif;
 }
 
 ::selection {
@@ -45,8 +46,8 @@ body {
   width: 100%;
   background: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.75rem;
+  border-radius: 0.9rem;
+  padding: 0.65rem 0.95rem;
   color: var(--cream);
   font-size: 0.9rem;
 }
@@ -59,13 +60,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
   font-size: 0.875rem;
   font-weight: 600;
   background: var(--brand);
   color: var(--ink);
-  transition: filter 0.15s;
+  transition: filter 0.15s, transform 0.2s ease;
   cursor: pointer;
 }
 .btn:hover {
@@ -92,7 +93,7 @@ body {
 .card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: 1.4rem;
 }
 
 /* Speed slider in the player */
@@ -178,4 +179,14 @@ input[type="range"].speed {
   .page-in-sweep, .page-in-fade, .page-in-quick, .comment-in { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .lift:hover { transform: none; }
+}
+
+/* Headings: chunky Bowlby One capitals, the same as thejoietv.com. */
+h1,
+h2 {
+  font-family: var(--font-heading), 'Bowlby One', sans-serif;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  line-height: 1.05;
+  letter-spacing: 0.005em;
 }

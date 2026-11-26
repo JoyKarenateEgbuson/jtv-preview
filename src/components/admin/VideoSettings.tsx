@@ -79,7 +79,7 @@ export default function VideoSettings({ video, people }: { video: Video; people:
               <label key={p.id} className="flex items-center gap-2">
                 <input type="checkbox" checked={personIds.includes(p.id)} onChange={() => toggle(p.id)} />
                 {p.name}
-                {p.kind === "guest" && <span className="rounded bg-line px-1.5 text-[10px]">guest</span>}
+                {p.kind === "guest" && <span className="rounded-lg bg-line px-1.5 text-[10px]">guest</span>}
               </label>
             ))}
           </div>

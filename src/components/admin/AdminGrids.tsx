@@ -88,10 +88,10 @@ export function VideoCards({ videos, people }: { videos: Video[]; people: Person
                   : "not shared yet"}
               </p>
               <p className="mt-2 flex gap-2 text-[11px]">
-                <span className={`rounded px-1.5 py-0.5 ${latest.watermark ? "bg-brand/20 text-brand" : "bg-line text-stone"}`}>
+                <span className={`rounded-lg px-1.5 py-0.5 ${latest.watermark ? "bg-brand/20 text-brand" : "bg-line text-stone"}`}>
                   watermark {latest.watermark ? "on" : "off"}
                 </span>
-                <span className={`rounded px-1.5 py-0.5 ${latest.allowDownload ? "bg-sun/20 text-sun" : "bg-line text-stone"}`}>
+                <span className={`rounded-lg px-1.5 py-0.5 ${latest.allowDownload ? "bg-sun/20 text-sun" : "bg-line text-stone"}`}>
                   download {latest.allowDownload ? "on" : "off"}
                 </span>
               </p>

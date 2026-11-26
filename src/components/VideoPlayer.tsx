@@ -392,7 +392,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   return (
     <div
       ref={wrapRef}
-      className="flex h-[calc(56.25vw+5.5rem)] w-full flex-col overflow-hidden rounded-xl bg-black select-none lg:h-[calc(100dvh-10rem)] lg:min-h-[340px] [&:fullscreen]:h-full [&:fullscreen]:rounded-none"
+      className="flex h-[calc(56.25vw+5.5rem)] w-full flex-col overflow-hidden rounded-2xl bg-black select-none lg:h-[calc(100dvh-10rem)] lg:min-h-[340px] [&:fullscreen]:h-full [&:fullscreen]:rounded-none"
       style={{ containerType: "inline-size" }}
     >
       {/* picture */}
@@ -564,11 +564,11 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         </div>
 
         <div className="mt-1 flex items-center gap-1 text-cream sm:gap-2">
-          <button type="button" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="grid h-8 w-8 place-items-center rounded hover:bg-white/10">
+          <button type="button" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10">
             {playing ? <Icon><path d="M6 5h4v14H6zm8 0h4v14h-4z" /></Icon> : <Icon><path d="M8 5v14l11-7z" /></Icon>}
           </button>
-          <button type="button" onClick={() => stepFrames(-1)} title="Back one frame (←)" className="grid h-8 w-8 place-items-center rounded text-xs font-bold hover:bg-white/10">‹|</button>
-          <button type="button" onClick={() => stepFrames(1)} title="Forward one frame (→)" className="grid h-8 w-8 place-items-center rounded text-xs font-bold hover:bg-white/10">|›</button>
+          <button type="button" onClick={() => stepFrames(-1)} title="Back one frame (←)" className="grid h-8 w-8 place-items-center rounded-lg text-xs font-bold hover:bg-white/10">‹|</button>
+          <button type="button" onClick={() => stepFrames(1)} title="Forward one frame (→)" className="grid h-8 w-8 place-items-center rounded-lg text-xs font-bold hover:bg-white/10">|›</button>
 
           <span className="font-mono text-xs tabular-nums sm:text-sm">
             {formatTc(time, fps)}
@@ -582,7 +582,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               aria-label="Loop"
               aria-pressed={loop}
               title="Loop"
-              className={`grid h-8 w-8 place-items-center rounded hover:bg-white/10 ${loop ? "text-brand" : ""}`}
+              className={`grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10 ${loop ? "text-brand" : ""}`}
             >
               <Icon><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></Icon>
             </button>
@@ -591,7 +591,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               type="button"
               onClick={() => setMenu(menu === "speed" ? null : "speed")}
               aria-label="Playback speed"
-              className={`h-8 rounded px-2 text-xs font-semibold hover:bg-white/10 ${rate !== 1 ? "text-brand" : ""}`}
+              className={`h-8 rounded-lg px-2 text-xs font-semibold hover:bg-white/10 ${rate !== 1 ? "text-brand" : ""}`}
             >
               {Number.isInteger(rate) ? rate.toFixed(1) : String(rate)}x
             </button>
@@ -602,7 +602,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               onClick={() => {
                 if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
               }}
-              className="grid h-8 w-8 place-items-center rounded hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10"
             >
               <Icon>
                 {muted || volume === 0 ? (
@@ -617,12 +617,12 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               type="button"
               onClick={() => setMenu(menu === "settings" ? null : "settings")}
               aria-label="Player settings"
-              className={`grid h-8 w-8 place-items-center rounded hover:bg-white/10 ${zoom !== "fit" || guides !== "off" ? "text-brand" : ""}`}
+              className={`grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10 ${zoom !== "fit" || guides !== "off" ? "text-brand" : ""}`}
             >
               <Icon><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.6.22L2.74 8.84a.5.5 0 00.12.64l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32c.12.22.37.29.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .6-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z" /></Icon>
             </button>
 
-            <button type="button" onClick={() => void toggleFullscreen()} aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} className="grid h-8 w-8 place-items-center rounded hover:bg-white/10">
+            <button type="button" onClick={() => void toggleFullscreen()} aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-white/10">
               <Icon>
                 {fullscreen ? (
                   <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
@@ -633,7 +633,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             </button>
 
             {menu === "speed" && (
-              <div className="absolute bottom-full right-0 z-30 mb-2 w-72 max-w-[85vw] rounded-xl border border-line bg-panel p-4 shadow-2xl">
+              <div className="absolute bottom-full right-0 z-30 mb-2 w-72 max-w-[85vw] rounded-2xl border border-line bg-panel p-4 shadow-2xl">
                 <p className="mb-3 text-sm text-cream/70">Playback speed</p>
                 <input
                   type="range"
@@ -656,7 +656,7 @@ const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             )}
 
             {menu === "settings" && (
-              <div className="absolute bottom-full right-0 z-30 mb-2 w-72 max-w-[85vw] space-y-4 rounded-xl border border-line bg-panel p-4 shadow-2xl">
+              <div className="absolute bottom-full right-0 z-30 mb-2 w-72 max-w-[85vw] space-y-4 rounded-2xl border border-line bg-panel p-4 shadow-2xl">
                 <div>
                   <p className="mb-2 text-sm text-cream/70">Zoom</p>
                   <div className="flex gap-1.5">

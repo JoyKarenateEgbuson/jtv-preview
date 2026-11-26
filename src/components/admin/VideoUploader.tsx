@@ -203,7 +203,7 @@ export default function VideoUploader({
 
   return (
     <div
-      className="rounded-xl border-2 border-dashed border-line p-5 text-center"
+      className="rounded-2xl border-2 border-dashed border-line p-5 text-center"
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
     >

@@ -206,14 +206,14 @@ export default function ReviewRoom(p: Props) {
           aria-haspopup="menu"
           aria-expanded={menuFor === c.id}
           onClick={() => setMenuFor(menuFor === c.id ? null : c.id)}
-          className="grid h-6 w-6 place-items-center rounded text-cream/70 hover:bg-white/10 hover:text-cream"
+          className="grid h-6 w-6 place-items-center rounded-lg text-cream/70 hover:bg-white/10 hover:text-cream"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
             <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
           </svg>
         </button>
         {menuFor === c.id && (
-          <div role="menu" className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-line bg-panel py-1 shadow-xl">
+          <div role="menu" className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-xl border border-line bg-panel py-1 shadow-xl">
             {items.map((it) => (
               <button
                 key={it.label}
@@ -387,7 +387,7 @@ export default function ReviewRoom(p: Props) {
             </p>
           )}
           {shown.map((c) => (
-            <div key={c.id} className={`comment-in rounded-lg border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-white/[0.03]"} ${c.resolved ? "opacity-70" : ""}`}>
+            <div key={c.id} className={`comment-in rounded-xl border p-3 ${c.internal ? "border-magenta/60 bg-magenta/10" : "border-line bg-white/[0.03]"} ${c.resolved ? "opacity-70" : ""}`}>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
@@ -395,15 +395,15 @@ export default function ReviewRoom(p: Props) {
                     playerRef.current?.pause();
                     playerRef.current?.seek(c.time);
                   }}
-                  className="shrink-0 whitespace-nowrap rounded bg-sun px-1.5 py-0.5 font-mono font-bold text-ink hover:brightness-110"
+                  className="shrink-0 whitespace-nowrap rounded-lg bg-sun px-1.5 py-0.5 font-mono font-bold text-ink hover:brightness-110"
                   title="Jump to this moment"
                 >
                   {formatTc(c.time, p.fps)}
                   {c.timeEnd != null && ` → ${formatTc(c.timeEnd, p.fps)}`}
                 </button>
                 <span className="min-w-0 truncate font-semibold">{c.author}</span>
-                {c.role === "admin" && <span className="shrink-0 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
-                {c.internal && <span className="shrink-0 rounded bg-magenta px-1.5 text-[10px] font-bold">INTERNAL</span>}
+                {c.role === "admin" && <span className="shrink-0 rounded-lg bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
+                {c.internal && <span className="shrink-0 rounded-lg bg-magenta px-1.5 text-[10px] font-bold">INTERNAL</span>}
                 <span className="ml-auto shrink-0 whitespace-nowrap text-stone">{formatDate(c.createdAt)}</span>
                 {renderMenu(c)}
               </div>
@@ -425,7 +425,7 @@ export default function ReviewRoom(p: Props) {
                 <div key={r.id} className="mt-2 border-l-2 border-line pl-3">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="min-w-0 truncate font-semibold">{r.author}</span>
-                    {r.role === "admin" && <span className="shrink-0 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
+                    {r.role === "admin" && <span className="shrink-0 rounded-lg bg-brand px-1.5 text-[10px] font-bold text-ink">TEAM</span>}
                     <span className="ml-auto shrink-0 whitespace-nowrap text-stone">{formatDate(r.createdAt)}</span>
                     {renderMenu(r)}
                   </div>
@@ -464,11 +464,11 @@ export default function ReviewRoom(p: Props) {
 
         <div className="border-t border-line p-4">
           <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded bg-sun px-1.5 py-0.5 font-mono font-bold text-ink">{startLabel}</span>
+            <span className="rounded-lg bg-sun px-1.5 py-0.5 font-mono font-bold text-ink">{startLabel}</span>
             {rangeEnd != null ? (
               <>
                 <span>→</span>
-                <span className="rounded bg-sun px-1.5 py-0.5 font-mono font-bold text-ink">{formatTc(rangeEnd, p.fps)}</span>
+                <span className="rounded-lg bg-sun px-1.5 py-0.5 font-mono font-bold text-ink">{formatTc(rangeEnd, p.fps)}</span>
                 <button type="button" className="text-cream/60 underline" onClick={() => { setRangeEnd(null); setRangeStart(null); }}>clear range</button>
               </>
             ) : (

@@ -125,7 +125,7 @@ export default function FolderMenu({ folder, people, counts, afterDelete, always
       </button>
 
       {open && (
-        <div role="menu" className="absolute right-0 top-full z-30 mt-1 w-52 overflow-hidden rounded-lg border border-line bg-panel py-1 shadow-xl">
+        <div role="menu" className="absolute right-0 top-full z-30 mt-1 w-52 overflow-hidden rounded-xl border border-line bg-panel py-1 shadow-xl">
           {items.map((it) => (
             <button
               key={it.label}
@@ -168,7 +168,7 @@ export default function FolderMenu({ folder, people, counts, afterDelete, always
                     onChange={() => setPicked((cur) => (cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id]))}
                   />
                   {p.name}
-                  {p.kind === "guest" && <span className="rounded bg-line px-1.5 text-[10px]">guest</span>}
+                  {p.kind === "guest" && <span className="rounded-lg bg-line px-1.5 text-[10px]">guest</span>}
                 </label>
               ))}
             </div>

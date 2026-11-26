@@ -66,7 +66,7 @@ export default function ShareLinks({
         {links.map((l) => {
           const expired = isExpired(l.expiresAt);
           return (
-            <li key={l.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-line p-3 text-sm">
+            <li key={l.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-line p-3 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{l.label}{l.viewerName && ` · ${l.viewerName}`}</p>
                 <p className="text-xs text-stone">
